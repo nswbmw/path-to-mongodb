@@ -1,0 +1,33 @@
+{
+  "name": "path-to-mongodb",
+  "version": "0.0.1",
+  "description": "Express style path to mongodb query.",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "test": "node_modules/tape/bin/tape test/*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nswbmw/path-to-mongodb"
+  },
+  "keywords": [
+    "mongodb",
+    "mongo",
+    "path",
+    "url",
+    "regexp",
+    "route",
+    "routing",
+    "querystring",
+    "qs"
+  ],
+  "dependencies": {
+    "debug": "^2.1.2",
+    "path-to-regexp": "~1.0.3",
+    "qs-mongodb": "~0.1.0"
+  },
+  "devDependencies": {
+    "tape": "*"
+  }
+}
