@@ -22,6 +22,15 @@ test('Test path-to-mongodb', function (t) {
     options: {}
   });
 
+  t.deepEqual(pathToMongodb('/:uid', '/1', {defaultCollection: 'users'}), {
+    db: undefined,
+    collection: 'users',
+    query: {
+      uid: 1
+    },
+    options: {}
+  });
+
   t.deepEqual(pathToMongodb('/:uid', '/1', {defaultDB: 'test', defaultCollection: 'users'}), {
     db: 'test',
     collection: 'users',
@@ -31,16 +40,7 @@ test('Test path-to-mongodb', function (t) {
     options: {}
   });
 
-  t.deepEqual(pathToMongodb('/users/:uid', '/users/"1"', {defaultDB: 'test'}), {
-    db: 'test',
-    collection: 'users',
-    query: {
-      uid: "1"
-    },
-    options: {}
-  });
-
-  t.deepEqual(pathToMongodb('/users', '/users?uid=1', {defaultDB: 'test'}), {
+  t.deepEqual(pathToMongodb('/test/:uid', '/1', {defaultCollection: 'users'}), {
     db: 'test',
     collection: 'users',
     query: {
@@ -49,7 +49,27 @@ test('Test path-to-mongodb', function (t) {
     options: {}
   });
 
-  t.deepEqual(pathToMongodb('/users', '/users?vip=true', {defaultDB: 'test'}), {
+  t.deepEqual(pathToMongodb('/test/users/:uid', '/1'), {
+    db: 'test',
+    collection: 'users',
+    query: {
+      uid: 1
+    },
+    options: {}
+  });
+
+  t.deepEqual(pathToMongodb('/test/users/user/:uid', '/user/"1"'), {
+    db: 'test',
+    collection: 'users',
+    query: {
+      uid: "1"
+    },
+    options: {}
+  });
+
+  t.deepEqual(pathToMongodb('/test/user', '/user?uid=1'), null);
+
+  t.deepEqual(pathToMongodb('/test/users/user', '/user?vip=true'), {
     db: 'test',
     collection: 'users',
     query: {
@@ -67,16 +87,7 @@ test('Test path-to-mongodb', function (t) {
     options: {}
   });
 
-  t.deepEqual(pathToMongodb('/users/:uid', '/users/1'), {
-    db: undefined,
-    collection: 'users',
-    query: {
-      uid: 1
-    },
-    options: {}
-  });
-
-  t.deepEqual(pathToMongodb('/users/:uid', '/users/1?uid=2&age=25', {defaultDB: 'test'}), {
+  t.deepEqual(pathToMongodb('/test/users/:uid', '/1?uid=2&age=25', {defaultDB: 'test2'}), {
     db: 'test',
     collection: 'users',
     query: {
@@ -86,7 +97,7 @@ test('Test path-to-mongodb', function (t) {
     options: {}
   });
 
-  t.deepEqual(pathToMongodb('/posts/:year/:month/:day/:title', '/posts/2015/2/14/hello-world', {defaultDB: 'test'}), {
+  t.deepEqual(pathToMongodb('/test/posts/posts/:year/:month/:day/:title', '/posts/2015/2/14/hello-world'), {
     db: 'test',
     collection: 'posts',
     query: {
@@ -98,7 +109,7 @@ test('Test path-to-mongodb', function (t) {
     options: {}
   });
 
-  t.deepEqual(pathToMongodb('/posts/:year/:month/:day/:title', '/posts/"2015"/"2"/"14"/hello-world', {defaultDB: 'test'}), {
+  t.deepEqual(pathToMongodb('/test/posts/posts/:year/:month/:day/:title', '/posts/"2015"/"2"/"14"/hello-world'), {
     db: 'test',
     collection: 'posts',
     query: {
@@ -110,7 +121,7 @@ test('Test path-to-mongodb', function (t) {
     options: {}
   });
 
-  t.deepEqual(pathToMongodb('/posts/:year', '/posts/2015?skip=100&limit=100', {defaultDB: 'test'}), {
+  t.deepEqual(pathToMongodb('/test/posts/posts/:year', '/posts/2015?skip=100&limit=100'), {
     db: 'test',
     collection: 'posts',
     query: {
@@ -122,7 +133,7 @@ test('Test path-to-mongodb', function (t) {
     }
   });
 
-  t.deepEqual(pathToMongodb('/posts/:year', '/posts/2015?skip=100&limit=100&_id=123', {defaultDB: 'test'}), {
+  t.deepEqual(pathToMongodb('/test/posts/posts/:year', '/posts/2015?skip=100&limit=100&_id=123'), {
     db: 'test',
     collection: 'posts',
     query: {
@@ -135,7 +146,7 @@ test('Test path-to-mongodb', function (t) {
     }
   });
 
-  t.deepEqual(pathToMongodb('/posts/:year', '/posts/2015?skip=100&limit=100&fields=title&fields=content&fields=comments', {defaultDB: 'test'}), {
+  t.deepEqual(pathToMongodb('/test/posts/posts/:year', '/posts/2015?skip=100&limit=100&fields=title&fields=content&fields=comments'), {
     db: 'test',
     collection: 'posts',
     query: {
@@ -148,7 +159,7 @@ test('Test path-to-mongodb', function (t) {
     }
   });
 
-  t.deepEqual(pathToMongodb('/posts/:year', '/posts/2015?skip=100&limit=100&fields=title&fields=content&fields=comments', {defaultDB: 'test', queryOptions: ['fields']}), {
+  t.deepEqual(pathToMongodb('/test/posts/posts/:year', '/posts/2015?skip=100&limit=100&fields=title&fields=content&fields=comments', {queryOptions: ['fields']}), {
     db: 'test',
     collection: 'posts',
     query: {
@@ -161,7 +172,7 @@ test('Test path-to-mongodb', function (t) {
     }
   });
 
-  t.deepEqual(pathToMongodb('/posts/:year', '/posts/2015?__skip=100&__limit=100', {defaultDB: 'test', queryOptions: ['skip', 'limit']}), {
+  t.deepEqual(pathToMongodb('/test/posts/posts/:year', '/posts/2015?__skip=100&__limit=100', {queryOptions: ['skip', 'limit']}), {
     db: 'test',
     collection: 'posts',
     query: {
@@ -172,7 +183,7 @@ test('Test path-to-mongodb', function (t) {
     options: {}
   });
 
-  t.deepEqual(pathToMongodb('/posts/:year', '/posts/2015?__skip=100&__limit=100', {defaultDB: 'test', queryOptions: {__skip: 'skip', __limit: 'limit'}}), {
+  t.deepEqual(pathToMongodb('/test/posts/posts/:year', '/posts/2015?__skip=100&__limit=100', {queryOptions: {__skip: 'skip', __limit: 'limit'}}), {
     db: 'test',
     collection: 'posts',
     query: {
@@ -184,7 +195,7 @@ test('Test path-to-mongodb', function (t) {
     }
   });
 
-  t.deepEqual(pathToMongodb('/posts/:year', '/posts/2015?skip=100&limit=100&fields=title&fields=content&fields=comments&sort[title]=-1', {defaultDB: 'test'}), {
+  t.deepEqual(pathToMongodb('/test/posts/posts/:year', '/posts/2015?skip=100&limit=100&fields=title&fields=content&fields=comments&sort[title]=-1'), {
     db: 'test',
     collection: 'posts',
     query: {
@@ -198,7 +209,7 @@ test('Test path-to-mongodb', function (t) {
     }
   });
 
-  t.deepEqual(pathToMongodb('/posts/:year/:skip/:limit', '/posts/2015/200/100?_id=123', {defaultDB: 'test'}), {
+  t.deepEqual(pathToMongodb('/test/posts/posts/:year/:skip/:limit', '/posts/2015/200/100?_id=123'), {
     db: 'test',
     collection: 'posts',
     query: {
@@ -210,7 +221,7 @@ test('Test path-to-mongodb', function (t) {
     options: {}
   });
 
-  t.deepEqual(pathToMongodb('/posts/:year/:skip/:limit', '/posts/2015/200/100?skip=10&limit=20&_id=123', {defaultDB: 'test'}), {
+  t.deepEqual(pathToMongodb('/test/posts/posts/:year/:skip/:limit', '/posts/2015/200/100?skip=10&limit=20&_id=123'), {
     db: 'test',
     collection: 'posts',
     query: {
@@ -225,7 +236,7 @@ test('Test path-to-mongodb', function (t) {
     }
   });
 
-  t.deepEqual(pathToMongodb('/posts/:year', '/posts/2015?((user=nswbmw||user=zk)&&(star=true||comments[$size]>=100))&skip=100&limit=100', {defaultDB: 'test'}), {
+  t.deepEqual(pathToMongodb('/test/posts/posts/:year', '/posts/2015?((user=nswbmw||user=zk)&&(star=true||comments[$size]>=100))&skip=100&limit=100'), {
     db: 'test',
     collection: 'posts',
     query: {
@@ -241,7 +252,7 @@ test('Test path-to-mongodb', function (t) {
     }
   });
 
-  t.deepEqual(pathToMongodb('/posts/:year', '/posts/2015?((user=nswbmw||user=zk)&&(star=true||comments[$size]>=100))&skip=100&limit=100', {defaultDB: 'test', depth: Infinity}), {
+  t.deepEqual(pathToMongodb('/test/posts/posts/:year', '/posts/2015?((user=nswbmw||user=zk)&&(star=true||comments[$size]>=100))&skip=100&limit=100', {depth: Infinity}), {
     db: 'test',
     collection: 'posts',
     query: {
@@ -257,7 +268,7 @@ test('Test path-to-mongodb', function (t) {
     }
   });
 
-  t.deepEqual(pathToMongodb('/posts/:year', '/posts/2015?(user=nswbmw||user=zk)&(star=true||comments[$size]>=100)&skip=100&limit=100', {defaultDB: 'test', depth: Infinity}), {
+  t.deepEqual(pathToMongodb('/test/posts/posts/:year', '/posts/2015?(user=nswbmw||user=zk)&(star=true||comments[$size]>=100)&skip=100&limit=100', {depth: Infinity}), {
     db: "test",
     collection: "posts",
     query: {

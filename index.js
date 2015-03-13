@@ -1,7 +1,7 @@
 var url = require('url');
 var debug = require('debug')('path-to-mongodb');
 var pathToRegexp = require('path-to-regexp');
-var qs = require('../qs-mongodb');
+var qs = require('qs-mongodb');
 
 var cache = {};
 
@@ -11,6 +11,11 @@ function pathToMongodb(path, realPath, options) {
   options = options || {};
   var queryOptions = options.queryOptions || ['skip', 'limit', 'sort', 'fields'];
 
+  var dbAndColl = path.match(/^\/(\w+)(?:\/(\w+))?/);
+  if (dbAndColl) path = path.slice(dbAndColl[0].length);
+  var _db = (dbAndColl || [])[1] || options.defaultDB;
+  var _collection = (dbAndColl || [])[2] || options.defaultCollection;
+
   var realPathObj = url.parse(realPath);
   var pathname = realPathObj.pathname;
   var querystring = realPathObj.query;
@@ -19,13 +24,12 @@ function pathToMongodb(path, realPath, options) {
   var pathArr = pathReg.exec(pathname);
   if (!pathArr) return null;
 
-  var _collection = formatCollection(path, options);
   var _query = formatQueryBefore(querystring, options);
   var _options = formatOptions(_query, queryOptions);
   _query = formatQueryAfter(_query, pathReg, pathArr);
 
   var result = {
-    db: options.defaultDB,
+    db: _db,
     collection: _collection,
     query: _query,
     options: _options
@@ -34,10 +38,6 @@ function pathToMongodb(path, realPath, options) {
   debug('%s => %s (%j) => %j', path, realPath, options, result);
   return result;
 };
-
-function formatCollection(path, options) {
-  return (path.match(/^\/([^:/]+)/) || [])[1] || options.defaultCollection;
-}
 
 function formatQueryBefore(querystring, options) {
   return querystring ? qs.parse(querystring, options) : {};
