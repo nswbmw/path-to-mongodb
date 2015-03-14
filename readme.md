@@ -11,11 +11,9 @@ Parse URL to MongoDB query.
 ```
 pathToMongodb(path, realPath, options);
 ```
-- path: {String} Express style path like: `/test/users/:uid`.
-- realPath: {String} Actual path like: `/test/users/123`.
+- path: {String} Express style path like: `/users/:uid`.
+- realPath: {String} Actual path like: `/users/123?vip=true`.
 - options: {Object}
-  - defaultDB: {String} Default db name.
-  - defaultCollection: {String} Default collection name.
   - queryOptions: {Object|Array} Options to preserve, see test.
   - others see [path-to-regexp](https://www.npmjs.com/package/path-to-regexp).
 
@@ -23,16 +21,14 @@ pathToMongodb(path, realPath, options);
 
 ```
 pathToMongodb(
-  '/test/posts/post/:year',
-  '/post/2015?__skip=100&__limit=100&(comments[$size]=10||praise>=5)',
+  '/posts/:year',
+  '/posts/2015?__skip=100&__limit=100&(comments[$size]=10||praise>=5)',
   {queryOptions: {__skip: 'skip', __limit: 'limit'}}
 );
 
 // output
 
 {
-  "db": "test",
-  "collection": "posts",
   "query": {
     "$or": [
       {"comments": {"$size": 10}},
@@ -51,16 +47,21 @@ Next, you may write like this:
 
 ```
 mongoclient
-  .db(obj.db)
-  .collection(obj.collection)
+  .db('test')
+  .collection('users')
   .find(obj.query, obj.options)
 ```
 
-see [test](https://github.com/nswbmw/path-to-mongodb/test/test.js) for more details.
+see [test](https://github.com/nswbmw/path-to-mongodb/blob/master/test/test.js) for more details.
 
 ### Test
 
     npm test
+
+### Benchmark
+
+    node benchmark
     
 ### License
+
 MIT

@@ -11,11 +11,6 @@ function pathToMongodb(path, realPath, options) {
   options = options || {};
   var queryOptions = options.queryOptions || ['skip', 'limit', 'sort', 'fields'];
 
-  var dbAndColl = path.match(/^\/(\w+)(?:\/(\w+))?/);
-  if (dbAndColl) path = path.slice(dbAndColl[0].length);
-  var _db = (dbAndColl || [])[1] || options.defaultDB;
-  var _collection = (dbAndColl || [])[2] || options.defaultCollection;
-
   var realPathObj = url.parse(realPath);
   var pathname = realPathObj.pathname;
   var querystring = realPathObj.query;
@@ -29,8 +24,6 @@ function pathToMongodb(path, realPath, options) {
   _query = formatQueryAfter(_query, pathReg, pathArr);
 
   var result = {
-    db: _db,
-    collection: _collection,
     query: _query,
     options: _options
   };
