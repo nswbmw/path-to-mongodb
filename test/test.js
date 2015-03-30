@@ -230,5 +230,47 @@ test('Test path-to-mongodb', function (t) {
     }
   });
 
+  function aliasLimitAndSkip(value) {
+    return 'limit=10&skip=' + (value * 10);
+  }
+
+  t.deepEqual(pathToMongodb('/posts/:year', '/posts/2015?(user=nswbmw||user=zk)&(star=true||comments[$size]>=100)&p=2', {
+    depth: Infinity,
+    alias: {
+      p: aliasLimitAndSkip
+    }
+  }), {
+    query: {
+      $or: [
+        {"user": "nswbmw", "star": true},
+        {"user": "zk", "comments": {"$size": {"$gte": 100}}}
+      ],
+      year: 2015
+    },
+    options: {
+      skip: 20,
+      limit: 10
+    }
+  });
+
+  t.deepEqual(pathToMongodb('/posts/:year', '/posts/2015?p=2&(user=nswbmw||user=zk)&(star=true||comments[$size]>=100)', {
+    depth: Infinity,
+    alias: {
+      p: 'limit=10&skip=20'
+    }
+  }), {
+    query: {
+      $or: [
+        {"user": "nswbmw", "star": true},
+        {"user": "zk", "comments": {"$size": {"$gte": 100}}}
+      ],
+      year: 2015
+    },
+    options: {
+      skip: 20,
+      limit: 10
+    }
+  });
+
   t.end();
 });

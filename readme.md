@@ -15,6 +15,7 @@ pathToMongodb(path, realPath, options);
 - realPath: {String} Actual path like: `/users/123?vip=true`.
 - options: {Object}
   - queryOptions: {Object|Array} Options to preserve, see test.
+  - alias: {Object} alias for `query` or `options`, eg: `p=2` -> `skip=20&limit=10`.
   - others see [path-to-regexp](https://www.npmjs.com/package/path-to-regexp).
 
 ### Example
@@ -22,7 +23,7 @@ pathToMongodb(path, realPath, options);
 ```
 pathToMongodb(
   '/posts/:year',
-  '/posts/2015?__skip=100&__limit=100&(comments[$size]=10||praise>=5)',
+  '/posts/2015?__skip=20&__limit=10&(comments[$size]=10||praise>=5)',
   {queryOptions: {__skip: 'skip', __limit: 'limit'}}
 );
 
@@ -37,8 +38,41 @@ pathToMongodb(
     "year": 2015
   },
   "options": {
-    "skip": 100,
-    "limit": 100
+    "skip": 20,
+    "limit": 10
+  }
+}
+```
+
+```
+function aliasLimitAndSkip(p) {
+  return 'limit=10&skip=' + (p * 10);
+}
+
+pathToMongodb(
+  '/posts/:year',
+  '/posts/2015?(user=nswbmw||user=zk)&(star=true||comments[$size]>=100)&p=2',
+  {
+    depth: Infinity,
+    alias: {
+      p: aliasLimitAndSkip
+    }
+  }
+);
+
+//output
+
+{
+  query: {
+    $or: [
+      {"user": "nswbmw", "star": true},
+      {"user": "zk", "comments": {"$size": {"$gte": 100}}}
+    ],
+    year: 2015
+  },
+  options: {
+    skip: 20,
+    limit: 10
   }
 }
 ```

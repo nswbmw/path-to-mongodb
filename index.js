@@ -19,6 +19,8 @@ function pathToMongodb(path, realPath, options) {
   var pathArr = pathReg.exec(pathname);
   if (!pathArr) return null;
 
+  querystring = formatAlias(querystring, options.alias);
+
   var _query = formatQueryBefore(querystring, options);
   var _options = formatOptions(_query, queryOptions);
   _query = formatQueryAfter(_query, pathReg, pathArr);
@@ -30,7 +32,23 @@ function pathToMongodb(path, realPath, options) {
 
   debug('%s => %s (%j) => %j', path, realPath, options, result);
   return result;
-};
+}
+
+function formatAlias(querystring, alias) {
+  if (!alias || (typeof alias !== 'object')) {
+    return querystring;
+  }
+  for (var i in alias) {
+    if (typeof alias[i] === 'function') {
+      querystring = querystring.replace(new RegExp(i + '\=([^&]+?)', 'g'), function (str, p1) {
+        return alias[i](p1);
+      });
+    } else {
+      querystring = querystring.replace(new RegExp(i + '\=([^&]+?)', 'g'), alias[i]);
+    }
+  }
+  return querystring;
+}
 
 function formatQueryBefore(querystring, options) {
   return querystring ? qs.parse(querystring, options) : {};
