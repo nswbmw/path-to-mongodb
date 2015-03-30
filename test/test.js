@@ -61,6 +61,15 @@ test('Test path-to-mongodb', function (t) {
     options: {}
   });
 
+  t.deepEqual(pathToMongodb('/users/:uid', '/users/1?uid=2&user.name=nswbmw&age=25'), {
+    query: {
+      uid: 1,
+      'user.name': 'nswbmw',
+      age: 25
+    },
+    options: {}
+  });
+
   t.deepEqual(pathToMongodb('/posts/:year/:month/:day/:title', '/posts/2015/2/14/hello-world'), {
     query: {
       year: 2015,
