@@ -35,6 +35,7 @@ function pathToMongodb(path, realPath, options) {
 }
 
 function formatAlias(querystring, alias) {
+  if (!querystring) return;
   if (!alias || (typeof alias !== 'object')) {
     return querystring;
   }
