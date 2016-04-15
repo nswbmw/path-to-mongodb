@@ -51,7 +51,7 @@ function aliasLimitAndSkip(p) {
 
 pathToMongodb(
   '/posts/:year',
-  '/posts/2015?(user=nswbmw||user=zk)&(star=true||comments[$size]>=100)&p=2',
+  '/posts/2015?((user=nswbmw||user=zk)&&(star=true||comments[$size]>=100))&p=2',
   {
     depth: Infinity,
     alias: {
@@ -63,17 +63,33 @@ pathToMongodb(
 //output
 
 {
-  query: {
-    $or: [
-      {"user": "nswbmw", "star": true},
-      {"user": "zk", "comments": {"$size": {"$gte": 100}}}
-    ],
-    year: 2015
-  },
-  options: {
-    skip: 20,
-    limit: 10
-  }
+    "query": {
+        "$and": [{
+            "$or": [{
+                "user": "nswbmw"
+            },
+            {
+                "user": "zk"
+            }]
+        },
+        {
+            "$or": [{
+                "star": true
+            },
+            {
+                "comments": {
+                    "$size": {
+                        "$gte": 100
+                    }
+                }
+            }]
+        }],
+        "year": 2015
+    },
+    "options": {
+        "limit": 10,
+        "skip": 20
+    }
 }
 ```
 
